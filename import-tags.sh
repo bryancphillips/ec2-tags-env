@@ -12,16 +12,17 @@ get_ami_tags () {
 
 tags_to_env () {
     tags=$1
+    prefix=$2
 
     for key in $(echo $tags | /usr/bin/jq -r ".[][].Key"); do
         value=$(echo $tags | /usr/bin/jq -r ".[][] | select(.Key==\"$key\") | .Value")
         key=$(echo $key | /usr/bin/tr '-' '_' | /usr/bin/tr '[:lower:]' '[:upper:]')
-        export $key="$value"
+        export "$prefix$key"="$value"
     done
 }
 
 ami_tags=$(get_ami_tags)
 instance_tags=$(get_instance_tags)
 
-tags_to_env "$ami_tags"
-tags_to_env "$instance_tags"
+tags_to_env "$ami_tags" 'ami_'
+tags_to_env "$instance_tags" 'instance_'
